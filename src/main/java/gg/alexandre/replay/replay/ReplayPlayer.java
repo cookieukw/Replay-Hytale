@@ -400,8 +400,8 @@ public class ReplayPlayer extends BasePlayer {
 
             playerRef.getPacketHandler().disconnect(
                     replay ?
-                            Message.translation("replay.clickReconnectToAccessReplay") :
-                            Message.translation("replay.clickReconnectToAccessWorld")
+                            Message.raw("Click 'Reconnect' to access your Replay.") :
+                            Message.raw("Click 'Reconnect' to access your World.")
             );
             return;
         }
