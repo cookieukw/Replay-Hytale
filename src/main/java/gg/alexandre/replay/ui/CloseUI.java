@@ -50,9 +50,12 @@ public class CloseUI extends BaseUI<CloseUI.Data> {
     }
 
     private void onSave(@Nonnull UIEventContext<Data> context) {
-        ReplayPlugin.get().stopReplaying(playerRef);
-        ReplayPlugin.get().stopCutScene(playerRef);
         context.close();
+
+        context.store.getExternalData().getWorld().execute(() -> {
+            ReplayPlugin.get().stopReplaying(playerRef);
+            ReplayPlugin.get().stopCutScene(playerRef);
+        });
     }
 
 }

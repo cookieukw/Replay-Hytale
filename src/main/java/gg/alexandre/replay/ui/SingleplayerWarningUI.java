@@ -54,7 +54,11 @@ public class SingleplayerWarningUI extends BaseUI<SingleplayerWarningUI.Data> {
     }
 
     private void onSave(@Nonnull UIEventContext<Data> context) {
-        ReplayPlugin.get().startReplaying(playerRef, replayPath);
+        context.close();
+
+        context.store.getExternalData().getWorld().execute(() -> {
+            ReplayPlugin.get().startReplaying(playerRef, replayPath);
+        });
     }
 
 }
