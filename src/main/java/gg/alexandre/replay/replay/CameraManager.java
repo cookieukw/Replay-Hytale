@@ -55,7 +55,7 @@ public class CameraManager {
         );
 
         PacketHandler packetHandler = playerRef.getPacketHandler();
-        if (!cutScene && !state.ui.controlGame) {
+        if (!cutScene) {
             applyFreeCameraMovement(playerRef);
         }
 

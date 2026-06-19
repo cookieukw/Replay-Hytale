@@ -596,7 +596,7 @@ public class ReplayPlayer extends BasePlayer {
             for (BaseProperty<?> property : state.timeline.getProperties().values()) {
                 property.handle(state, state.targetTick);
             }
-        } else if (!state.ui.controlGame) {
+        } else {
             state.cameraManager.applyFreeCameraMovement(playerRef);
         }
 
