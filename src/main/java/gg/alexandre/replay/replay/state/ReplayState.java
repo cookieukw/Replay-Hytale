@@ -62,21 +62,21 @@ public class ReplayState {
 
     public void loadTimelines(UUID uuid) throws IOException {
         Path dir = TimelineState.EDITS_DIRECTORY.resolve(uuid.toString());
-        List<String> timelines;
+        List<String> loadedTimelines;
 
         if (Files.isDirectory(dir)) {
             try (Stream<Path> stream = Files.list(dir)) {
-                timelines = stream
+                loadedTimelines = stream
                         .map(path -> path.getFileName().toString())
                         .filter(path -> path.toLowerCase(Locale.ROOT).endsWith(".json"))
                         .map(path -> path.substring(0, path.length() - 5))
                         .toList();
             }
         } else {
-            timelines = List.of(TimelineState.DEFAULT_TIMELINE_NAME);
+            loadedTimelines = List.of(TimelineState.DEFAULT_TIMELINE_NAME);
         }
 
-        this.timelines.addAll(timelines);
+        this.timelines.addAll(loadedTimelines);
 
         if (this.timelines.isEmpty() || this.timelines.contains(TimelineState.DEFAULT_TIMELINE_NAME)) {
             loadTimeline(uuid, TimelineState.DEFAULT_TIMELINE_NAME);
