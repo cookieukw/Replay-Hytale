@@ -84,6 +84,10 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
             uiCommandBuilder.set("#List[" + i + "][0].Text", name);
         }
 
+        renderEmptyMessage(uiCommandBuilder, replays);
+    }
+
+    private void renderEmptyMessage(@Nonnull UICommandBuilder uiCommandBuilder, @Nonnull List<Path> replays) {
         if (replays.isEmpty()) {
             uiCommandBuilder.appendInline("#List", """
                     Label {
@@ -110,11 +114,15 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
             Path replay = replays.get(i);
             eventHandler.handle(CustomUIEventBindingType.Activating,
                     "#List[" + i + "][0]",
-                    context -> onReplay(context, replay)
+                    null,
+                    context -> onReplay(context, replay),
+                    true
             );
             eventHandler.handle(CustomUIEventBindingType.Activating,
                     "#List[" + i + "][1]",
-                    context -> onDeleteReplay(context, replay)
+                    null,
+                    context -> onDeleteReplay(context, replay),
+                    true
             );
         }
     }
@@ -126,18 +134,8 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
 
     private void onDeleteReplay(@Nonnull UIEventContext<Data> context, @Nonnull Path replay) {
         replayRepository.deleteReplay(replay);
-        context.close();
-
-        Ref<EntityStore> ref = context.playerRef.getReference();
-        if (ref == null) return;
-        Store<EntityStore> store = ref.getStore();
-
-        store.getExternalData().getWorld().execute(() -> {
-            Player playerComponent = store.getComponent(ref, Player.getComponentType());
-            if (playerComponent != null) {
-                playerComponent.getPageManager().openCustomPage(ref, store, new ReplayUI(playerRef, replayRepository, recorder));
-            }
-        });
+        renderList(context.uiCommandBuilder);
+        registerListEvents(context.uiEventHandler);
     }
 
     private void onRecord(@Nonnull UIEventContext<Data> context) {
