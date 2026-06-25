@@ -467,7 +467,18 @@ public class ReplayPlayer extends BasePlayer {
 
     public void stop(@Nonnull PlayerRef playerRef) {
         ReplayState state = states.get(playerRef.getUuid());
-        if (state == null || !state.stage.hasStarted) {
+        if (state == null) {
+            return;
+        }
+
+        if (!state.stage.hasStarted) {
+            // Replay was initialised but never fully started; just clean up the state
+            states.remove(state.playerUuid);
+            try {
+                state.file.close();
+            } catch (IOException e) {
+                logger.atWarning().withCause(e).log("Error closing replay file for uninitialised replay");
+            }
             return;
         }
 
