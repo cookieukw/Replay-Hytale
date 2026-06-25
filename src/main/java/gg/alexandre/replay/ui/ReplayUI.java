@@ -31,6 +31,8 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
     private final ReplayRepository replayRepository;
     private final ReplayRecorder recorder;
 
+    private boolean recording;
+
     private static final BuilderCodec<Data> CODEC = CodecConstructor.create(Data.class, Data::new);
 
     public static class Data extends UIEventIdData {
@@ -53,6 +55,7 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
 
         RecordingData recordingData = recorder.getRecordingData(playerRef);
         if (recordingData != null) {
+            recording = true;
             uiCommandBuilder.set("#Record.Text", Message.translation("replay.stopRecording"));
 
             Duration duration = recordingData.start.until(Instant.now());
@@ -138,18 +141,16 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
     }
 
     private void onRecord(@Nonnull UIEventContext<Data> context) {
-        context.close();
+        if (!recording) {
+            context.close();
+        }
 
         Ref<EntityStore> ref = context.playerRef.getReference();
-        if (ref == null) {
-            return;
-        }
-        
+        assert ref != null;
         Store<EntityStore> store = ref.getStore();
-        boolean isRecording = recorder.getRecordingData(playerRef) != null;
 
         store.getExternalData().getWorld().execute(() -> {
-            if (isRecording) {
+            if (recording) {
                 ReplayPlugin.get().stopRecording(playerRef);
             } else {
                 ReplayPlugin.get().startRecording(playerRef);
