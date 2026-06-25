@@ -97,7 +97,7 @@ public class ReplayPlayer extends BasePlayer {
                 return false;
             }
 
-            if (packet instanceof RequestAssets && !state.stage.isFilteringPackets) {
+            if (packet instanceof RequestAssets && !state.stage.processedConfigPhase) {
                 state.file.consumeConfigPhase((replayPacket) -> replayPacket.handle(handler, state));
                 handler.tryFlush();
 
@@ -109,7 +109,7 @@ public class ReplayPlayer extends BasePlayer {
                     throw new RuntimeException(e);
                 }
 
-                state.stage.isFilteringPackets = true;
+                state.stage.processedConfigPhase = true;
 
                 return true;
             }
@@ -340,6 +340,7 @@ public class ReplayPlayer extends BasePlayer {
 
     public void initState(@Nonnull UUID uuid, @Nonnull String lang, @Nonnull Path replayPath) {
         ReplayState state = new ReplayState();
+        state.stage.isFilteringPackets = true;
         state.path = replayPath;
         state.playerUuid = uuid;
         state.lang = lang;
