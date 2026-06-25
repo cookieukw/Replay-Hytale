@@ -31,10 +31,15 @@ public class MoveKeyframeCommand extends CommandBase {
     }
 
     private void move(int from, int to) {
-        BaseProperty property = state.timeline.getProperties().get(propertyId);
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
 
         Object value = property.getValues().remove(from);
-        property.getValues().put(to, value);
+        if (value != null) {
+            property.getValues().put(to, value);
+        }
     }
 
     @Override
