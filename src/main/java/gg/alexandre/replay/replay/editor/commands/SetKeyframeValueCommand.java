@@ -30,9 +30,15 @@ public class SetKeyframeValueCommand extends CommandBase {
 
     @Override
     public void undo() {
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
         if (previousValue != null) {
-            BaseProperty property = state.timeline.getProperties().get(propertyId);
             property.getValues().put(tick, previousValue);
+        } else {
+            // Keyframe did not exist before; remove the one that was added
+            property.getValues().remove(tick);
         }
     }
 
