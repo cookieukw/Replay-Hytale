@@ -24,13 +24,12 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 
 public class ReplayUI extends BaseUI<ReplayUI.Data> {
 
     private final ReplayRepository replayRepository;
     private final ReplayRecorder recorder;
-
-    private boolean recording;
 
     private static final BuilderCodec<Data> CODEC = CodecConstructor.create(Data.class, Data::new);
 
@@ -50,30 +49,10 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
     public void init(@Nonnull UICommandBuilder uiCommandBuilder) {
         uiCommandBuilder.append("Replay.ui");
 
-        List<Path> replays = replayRepository.getReplays(playerRef);
-        for (int i = 0; i < replays.size(); i++) {
-            Path replay = replays.get(i);
-            uiCommandBuilder.append("#List", "ReplayEntry.ui");
-
-            String name = replay.getFileName().toString();
-            if (name.endsWith(ReplayRepository.REPLAY_EXTENSION)) {
-                name = name.substring(0, name.length() - ReplayRepository.REPLAY_EXTENSION.length());
-            }
-            uiCommandBuilder.set("#List[" + i + "].Text", name);
-        }
-
-        if (replays.isEmpty()) {
-            uiCommandBuilder.appendInline("#List", """
-                    Label {
-                      Text: %replay.noReplaysYet;
-                      Style: (FontSize: 16, Alignment: Center);
-                    }
-                    """);
-        }
+        renderList(uiCommandBuilder);
 
         RecordingData recordingData = recorder.getRecordingData(playerRef);
         if (recordingData != null) {
-            recording = true;
             uiCommandBuilder.set("#Record.Text", Message.translation("replay.stopRecording"));
 
             Duration duration = recordingData.start.until(Instant.now());
@@ -88,6 +67,30 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
         }
     }
 
+    private void renderList(@Nonnull UICommandBuilder uiCommandBuilder) {
+        uiCommandBuilder.clear("#List");
+        List<Path> replays = replayRepository.getReplays(playerRef);
+        for (int i = 0; i < replays.size(); i++) {
+            Path replay = replays.get(i);
+            uiCommandBuilder.append("#List", "ReplayEntry.ui");
+
+            String name = replay.getFileName().toString();
+            if (name.endsWith(ReplayRepository.REPLAY_EXTENSION)) {
+                name = name.substring(0, name.length() - ReplayRepository.REPLAY_EXTENSION.length());
+            }
+            uiCommandBuilder.set("#List[" + i + "][0].Text", name);
+        }
+
+        if (replays.isEmpty()) {
+            uiCommandBuilder.appendInline("#List", """
+                    Label {
+                      Text: %replay.noReplaysYet;
+                      Style: (FontSize: 16, Alignment: Center);
+                    }
+                    """);
+        }
+    }
+
     @Override
     public void register(@Nonnull UIEventBuilder uiEventBuilder, @Nonnull UIEventHandler<Data> eventHandler) {
         eventHandler.handle(CustomUIEventBindingType.Activating,
@@ -95,12 +98,20 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
                 this::onRecord
         );
 
+        registerListEvents(eventHandler);
+    }
+
+    private void registerListEvents(@Nonnull UIEventHandler<Data> eventHandler) {
         List<Path> replays = replayRepository.getReplays(playerRef);
         for (int i = 0; i < replays.size(); i++) {
             Path replay = replays.get(i);
             eventHandler.handle(CustomUIEventBindingType.Activating,
-                    "#List[" + i + "]",
+                    "#List[" + i + "][0]",
                     context -> onReplay(context, replay)
+            );
+            eventHandler.handle(CustomUIEventBindingType.Activating,
+                    "#List[" + i + "][1]",
+                    context -> onDeleteReplay(context, replay)
             );
         }
     }
@@ -110,17 +121,35 @@ public class ReplayUI extends BaseUI<ReplayUI.Data> {
         context.close();
     }
 
-    private void onRecord(@Nonnull UIEventContext<Data> context) {
-        if (!recording) {
-            context.close();
-        }
+    private void onDeleteReplay(@Nonnull UIEventContext<Data> context, @Nonnull Path replay) {
+        replayRepository.deleteReplay(replay);
+        context.close();
 
         Ref<EntityStore> ref = context.playerRef.getReference();
-        assert ref != null;
+        if (ref == null) return;
         Store<EntityStore> store = ref.getStore();
 
         store.getExternalData().getWorld().execute(() -> {
-            if (recording) {
+            Player playerComponent = store.getComponent(ref, Player.getComponentType());
+            if (playerComponent != null) {
+                playerComponent.getPageManager().openCustomPage(ref, store, new ReplayUI(playerRef, replayRepository, recorder));
+            }
+        });
+    }
+
+    private void onRecord(@Nonnull UIEventContext<Data> context) {
+        context.close();
+
+        Ref<EntityStore> ref = context.playerRef.getReference();
+        if (ref == null) {
+            return;
+        }
+        
+        Store<EntityStore> store = ref.getStore();
+        boolean isRecording = recorder.getRecordingData(playerRef) != null;
+
+        store.getExternalData().getWorld().execute(() -> {
+            if (isRecording) {
                 ReplayPlugin.get().stopRecording(playerRef);
             } else {
                 ReplayPlugin.get().startRecording(playerRef);
