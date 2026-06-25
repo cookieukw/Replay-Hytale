@@ -21,15 +21,20 @@ public class RemoveKeyframeCommand extends CommandBase {
 
     @Override
     public void execute() {
-        BaseProperty property = state.timeline.getProperties().get(propertyId);
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
         value = property.getValues().remove(tick);
     }
 
     @Override
     public void undo() {
         if (value != null) {
-            BaseProperty property = state.timeline.getProperties().get(propertyId);
-            property.getValues().put(tick, value);
+            BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+            if (property != null) {
+                property.getValues().put(tick, value);
+            }
         }
     }
 
