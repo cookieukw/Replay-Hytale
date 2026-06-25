@@ -17,6 +17,6 @@
         "Hytale:AssetModule": "*"
     },
     "OptionalDependencies": {},
-    "ServerVersion": "0.5.x",
+    "ServerVersion": "^0.5.6",
     "Main": "gg.alexandre.replay.ReplayPlugin"
 }

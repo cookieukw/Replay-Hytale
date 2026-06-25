@@ -7,5 +7,5 @@ plugins {
 }
 
 hytale {
-    usePatchline(Patchline.RELEASE.name)
+    useVersion("0.5.6")
 }
