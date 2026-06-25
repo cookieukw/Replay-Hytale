@@ -23,7 +23,7 @@ public class UpdateUtil {
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private static Instant lastChecked = Instant.MIN;
+    private static volatile Instant lastChecked = Instant.MIN;
 
     @Nonnull
     public static CompletableFuture<Optional<Semver>> getUpdateAsync(@Nonnull Semver currentVersion) {
