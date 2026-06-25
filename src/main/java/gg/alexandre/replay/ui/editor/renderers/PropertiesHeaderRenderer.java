@@ -18,6 +18,7 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
 
     private int propertiesCount = -1;
     private UIState.Keyframe lastSelectedKeyframe = null;
+    private int lastDraggingTick = -1;
 
     public PropertiesHeaderRenderer(@Nonnull ReplayState state) {
         super(state);
@@ -27,11 +28,13 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
     public void render(@Nonnull UICommandBuilder uiCommandBuilder, @Nonnull UIEventHandler<EditorUI.Data> eventHandler,
                        @Nonnull ReplayState state, int width) {
         if (propertiesCount == state.timeline.getProperties().size() &&
-            lastSelectedKeyframe == state.ui.selectedKeyframe) {
+            lastSelectedKeyframe == state.ui.selectedKeyframe &&
+            lastDraggingTick == state.ui.draggingTick) {
             return;
         }
         propertiesCount = state.timeline.getProperties().size();
         lastSelectedKeyframe = state.ui.selectedKeyframe;
+        lastDraggingTick = state.ui.draggingTick;
 
         StringBuilder headers = new StringBuilder();
 
@@ -116,8 +119,9 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
 
         for (BaseProperty<?> property : state.timeline.getProperties().values()) {
             String id = property.id();
-            boolean hasSelectedKeyframe = state.ui.selectedKeyframe != null &&
-                                          state.ui.selectedKeyframe.propertyId().equals(id);
+            boolean hasSelectedKeyframe = (state.ui.selectedKeyframe != null &&
+                                           state.ui.selectedKeyframe.propertyId().equals(id)) ||
+                                          property.getValues().containsKey(state.ui.draggingTick);
 
             headers.append(String.format("""
                     @Container {
