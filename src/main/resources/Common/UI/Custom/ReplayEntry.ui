@@ -1,7 +1,22 @@
 $C = "Common.ui";
 
-$C.@TextButton {
-  @Text = "Name";
-  @Anchor = (Top: 5);
-  FlexWeight: 1;
+Group {
+  LayoutMode: Left;
+  Anchor: (Top: 5, Height: 30, Left: 0, Right: 0);
+
+  $C.@TextButton #Play {
+    @Text = "Name";
+    FlexWeight: 1;
+  }
+
+  Button #Delete {
+    Anchor: (Width: 20, Height: 20, Left: 6, Top: 5);
+    TooltipText: "Delete";
+    Style: (
+      Default: ( Background: (TexturePath: "Assets/Close.png") ),
+      Hovered: ( Background: (TexturePath: "Assets/CloseHovered.png") ),
+      Pressed: ( Background: (TexturePath: "Assets/ClosePressed.png") ),
+      Sounds: ( MouseHover: (SoundPath: "Sounds/ButtonsLightHover.ogg", Volume: 6.0) )
+    );
+  }
 }
