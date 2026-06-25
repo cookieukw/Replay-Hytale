@@ -33,9 +33,14 @@ public class RemoveKeyframeCommand extends CommandBase {
         if (value != null) {
             BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
             if (property != null) {
-                property.getValues().put(tick, value);
+                restoreKeyframeGeneric(property, tick, value);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void restoreKeyframeGeneric(BaseProperty<T> property, int tick, Object value) {
+        property.getValues().put(tick, (T) value);
     }
 
 }

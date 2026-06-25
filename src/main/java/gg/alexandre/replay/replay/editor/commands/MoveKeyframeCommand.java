@@ -32,11 +32,13 @@ public class MoveKeyframeCommand extends CommandBase {
 
     private void move(int from, int to) {
         BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
-        if (property == null) {
-            return;
+        if (property != null) {
+            moveKeyframeGeneric(property, from, to);
         }
+    }
 
-        Object value = property.getValues().remove(from);
+    private <T> void moveKeyframeGeneric(BaseProperty<T> property, int from, int to) {
+        T value = property.getValues().remove(from);
         if (value != null) {
             property.getValues().put(to, value);
         }

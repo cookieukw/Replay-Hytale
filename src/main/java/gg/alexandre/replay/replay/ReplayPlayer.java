@@ -3,6 +3,7 @@ package gg.alexandre.replay.replay;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -325,7 +326,15 @@ public class ReplayPlayer extends BasePlayer {
             clearWorld(playerRef, states.get(playerRef.getUuid()));
         }
 
+        // Capture the player's current world before transitioning so we can return them to it.
+        Ref<EntityStore> ref = playerRef.getReference();
+        World originWorld = (ref != null) ? ref.getStore().getExternalData().getWorld() : null;
+
         initState(playerRef.getUuid(), playerRef.getLanguage(), replayPath);
+
+        ReplayState state = states.get(playerRef.getUuid());
+        state.originalWorld = originWorld;
+
         transfer(playerRef, true);
     }
 
@@ -378,6 +387,11 @@ public class ReplayPlayer extends BasePlayer {
         }
     }
 
+    /**
+     * Saves the current replay state to disk as a crash-recovery fallback.
+     * This is no longer used in the normal transition flow, but is kept in case the
+     * server shuts down unexpectedly while a replay is in progress.
+     */
     private void saveState(@Nonnull ReplayState state) {
         JsonObject json = new JsonObject();
         json.addProperty("uuid", state.playerUuid.toString());
@@ -392,41 +406,61 @@ public class ReplayPlayer extends BasePlayer {
         }
     }
 
-    private void transfer(@Nonnull PlayerRef playerRef, boolean replay) {
-        if (Constants.SINGLEPLAYER) {
-            if (replay) {
-                saveState(states.get(playerRef.getUuid()));
-            }
+    /**
+     * Seamlessly transitions the player in or out of replay mode using
+     * {@link Universe#resetPlayer}, which reloads the player's entity state into
+     * the target world without any disconnect.
+     *
+     * @param playerRef the player to transition
+     * @param toReplay  {@code true} to move the player into their replay world,
+     *                  {@code false} to return them to their original world
+     */
+    private void transfer(@Nonnull PlayerRef playerRef, boolean toReplay) {
+        ReplayState state = states.get(playerRef.getUuid());
 
-            playerRef.getPacketHandler().disconnect(
-                    replay ?
-                            Message.raw("Click 'Reconnect' to access your Replay.") :
-                            Message.raw("Click 'Reconnect' to access your World.")
-            );
+        // Determine which world to move the player into.
+        World targetWorld;
+        if (toReplay) {
+            // The replay world is the world the player is currently in — we keep them
+            // in the same world but reset their entity context so the packet filter
+            // can intercept the fresh join sequence and replay the file.
+            Ref<EntityStore> ref = playerRef.getReference();
+            targetWorld = (ref != null) ? ref.getStore().getExternalData().getWorld() : null;
+        } else {
+            // Return the player to the world they were in before the replay started.
+            targetWorld = (state != null) ? state.originalWorld : null;
+        }
+
+        if (targetWorld == null) {
+            // Fallback: if we lost track of the world, use the server default.
+            targetWorld = Universe.get().getDefaultWorld();
+        }
+
+        if (targetWorld == null) {
+            logger.atWarning().log("No target world found for player %s during replay transfer — keeping them in place.", playerRef.getUuid());
             return;
         }
 
-        try {
-            byte[] referralData = null;
-            if (replay) {
-                // Some plugins might want to know that this is a replay
-                JsonObject referral = new JsonObject();
-                referral.addProperty("replay", true);
+        final World finalTargetWorld = targetWorld;
+        Universe.get().getPlayerStorage().load(playerRef.getUuid())
+                .thenCompose(holder -> Universe.get().resetPlayer(playerRef, holder, finalTargetWorld, null))
+                .exceptionally(throwable -> {
+                    logger.atWarning().withCause(throwable).log(
+                            "Failed to seamlessly transfer player %s %s replay; falling back to disconnect.",
+                            playerRef.getUuid(), toReplay ? "into" : "out of"
+                    );
 
-                referralData = ReplayPlugin.get().getGson().toJson(referral).getBytes(StandardCharsets.UTF_8);
-            }
-
-            InetSocketAddress publicAddress = ServerManager.get().getLocalOrPublicAddress();
-            assert publicAddress != null;
-
-            playerRef.referToServer(
-                    publicAddress.getHostName(),
-                    publicAddress.getPort(),
-                    referralData
-            );
-        } catch (SocketException e) {
-            throw new RuntimeException(e);
-        }
+                    // Legacy fallback: disconnect with a message so the player can reconnect manually.
+                    if (toReplay && state != null) {
+                        saveState(state);
+                    }
+                    playerRef.getPacketHandler().disconnect(
+                            toReplay ?
+                                    Message.raw("Click 'Reconnect' to access your Replay.") :
+                                    Message.raw("Click 'Reconnect' to access your World.")
+                    );
+                    return null;
+                });
     }
 
     public void restart(@Nonnull ReplayState state, int tick) {

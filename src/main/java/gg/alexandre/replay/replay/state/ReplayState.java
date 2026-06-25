@@ -10,6 +10,8 @@ import gg.alexandre.replay.replay.editor.properties.CameraProperty;
 import gg.alexandre.replay.util.CameraPathDebugOverlay;
 import gg.alexandre.replay.util.FovPacketUtil;
 
+import com.hypixel.hytale.server.core.universe.world.World;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -59,6 +61,10 @@ public class ReplayState {
 
     public String selectedTimeline;
     public List<String> timelines = new ArrayList<>();
+
+    /** The world the player was in before entering replay mode. Used to return them seamlessly. */
+    @Nullable
+    public World originalWorld;
 
     public void loadTimelines(UUID uuid) throws IOException {
         Path dir = TimelineState.EDITS_DIRECTORY.resolve(uuid.toString());
