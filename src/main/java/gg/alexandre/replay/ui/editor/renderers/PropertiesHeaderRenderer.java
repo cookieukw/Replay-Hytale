@@ -163,15 +163,25 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
         boolean hasSelectedKeyframe = state.ui.selectedKeyframe != null &&
                                       state.ui.selectedKeyframe.propertyId().equals(propertyId);
 
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
+        
+        int playhead = context.data.playhead;
+
         if (hasSelectedKeyframe) {
             state.commandsStack.execute(new RemoveKeyframeCommand(
                     state, propertyId, state.ui.selectedKeyframe.tick()
             ));
+        } else if (property.getValues().containsKey(playhead)) {
+            // Toggle behavior: if a keyframe already exists at the playhead, remove it
+            state.commandsStack.execute(new RemoveKeyframeCommand(
+                    state, propertyId, playhead
+            ));
         } else {
-            BaseProperty property = state.timeline.getProperties().get(propertyId);
-
             state.commandsStack.execute(new AddKeyframeCommand(
-                    state, propertyId, context.data.playhead, property.getDefaultValue(state)
+                    state, propertyId, playhead, property.getDefaultValue(state)
             ));
         }
 
