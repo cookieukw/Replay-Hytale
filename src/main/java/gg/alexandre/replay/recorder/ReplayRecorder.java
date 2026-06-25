@@ -166,14 +166,17 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
             return;
         }
 
+        // Always remove from watcherToPlayer, regardless of world.execute() success
+        if (data.watcher != null) {
+            watcherToPlayer.remove(data.watcher.getUuid());
+        }
+
         Ref<EntityStore> ref = playerRef.getReference();
         assert ref != null;
         Store<EntityStore> store = ref.getStore();
         World world = store.getExternalData().getWorld();
         world.execute(() -> {
             if (data.watcher != null) {
-                watcherToPlayer.remove(data.watcher.getUuid());
-
                 Ref<EntityStore> watcherRef = data.watcher.getReference();
                 if (watcherRef != null && watcherRef.isValid()) {
                     world.getEntityStore().getStore().removeEntity(watcherRef, RemoveReason.REMOVE);
