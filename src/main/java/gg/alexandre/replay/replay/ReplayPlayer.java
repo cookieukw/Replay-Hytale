@@ -51,6 +51,8 @@ import gg.alexandre.replay.protocol.packets.EndSnapshotReplayPacket;
 import gg.alexandre.replay.protocol.packets.TickReplayPacket;
 import gg.alexandre.replay.replay.editor.properties.base.BaseProperty;
 import gg.alexandre.replay.replay.state.ReplayState;
+import gg.alexandre.replay.util.CameramanUtil;
+import gg.alexandre.replay.util.CameraPathDebugOverlay;
 import gg.alexandre.replay.util.FovPacketUtil;
 import gg.alexandre.replay.util.Position;
 import gg.alexandre.replay.util.PositionTracker;
@@ -98,8 +100,10 @@ public class ReplayPlayer extends BasePlayer {
             }
 
             if (packet instanceof RequestAssets && !state.stage.processedConfigPhase) {
+                state.stage.isProcessingPackets = true;
                 state.file.consumeConfigPhase((replayPacket) -> replayPacket.handle(handler, state));
                 handler.tryFlush();
+                state.stage.isProcessingPackets = false;
 
                 try {
                     Field receivedRequest = SetupPacketHandler.class.getDeclaredField("receivedRequest");
@@ -445,6 +449,14 @@ public class ReplayPlayer extends BasePlayer {
         final World finalTargetWorld = targetWorld;
         Universe.get().getPlayerStorage().load(playerRef.getUuid())
                 .thenCompose(holder -> Universe.get().resetPlayer(playerRef, holder, finalTargetWorld, null))
+                .thenAccept(ref -> {
+                    if (toReplay && ref != null) {
+                        var entityRef = ref.getReference();
+                        if (entityRef != null) {
+                            CameramanUtil.makeGhost(entityRef.getStore(), entityRef);
+                        }
+                    }
+                })
                 .exceptionally(throwable -> {
                     logger.atWarning().withCause(throwable).log(
                             "Failed to seamlessly transfer player %s %s replay; falling back to disconnect.",
