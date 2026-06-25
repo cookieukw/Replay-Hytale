@@ -4,6 +4,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.Comparator;
@@ -66,5 +68,14 @@ public class ReplayRepository {
         }
 
         return replayDirectory.resolve(playerRef.getUuid().toString()).resolve(name);
+    }
+
+    public boolean deleteReplay(@Nonnull Path replayPath) {
+        try {
+            return Files.deleteIfExists(replayPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
