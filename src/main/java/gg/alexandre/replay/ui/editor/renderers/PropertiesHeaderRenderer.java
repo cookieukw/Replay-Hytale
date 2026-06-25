@@ -29,7 +29,8 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
                        @Nonnull ReplayState state, int width) {
         if (propertiesCount == state.timeline.getProperties().size() &&
             lastSelectedKeyframe == state.ui.selectedKeyframe &&
-            lastDraggingTick == state.ui.draggingTick) {
+            lastDraggingTick == state.ui.draggingTick &&
+            !state.ui.dirtyTimeline) {
             return;
         }
         propertiesCount = state.timeline.getProperties().size();
