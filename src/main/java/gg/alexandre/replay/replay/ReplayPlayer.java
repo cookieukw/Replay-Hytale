@@ -493,6 +493,7 @@ public class ReplayPlayer extends BasePlayer {
         state.stage.clearedWorld = false;
         state.stage.sentJoinWorld = false;
         state.stage.clientReady = false;
+        state.stage.processedConfigPhase = false;
         state.clientId = 0;
 
         super.restart(state);
@@ -515,6 +516,14 @@ public class ReplayPlayer extends BasePlayer {
                 logger.atWarning().withCause(e).log("Error closing replay file for uninitialised replay");
             }
             return;
+        }
+
+        // Clean up client-side effects before removing state
+        if (playerRef.isValid()) {
+            if (state.fovUtil != null) {
+                state.fovUtil.clear();
+            }
+            state.overlay.clearImmediately(playerRef);
         }
 
         stop(state);
