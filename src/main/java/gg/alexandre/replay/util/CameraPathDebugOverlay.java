@@ -17,7 +17,23 @@ import java.time.Instant;
 import java.util.List;
 
 public class CameraPathDebugOverlay {
-    private static final byte FLAG_FADE = (byte) (1 << DebugFlags.Fade.getValue());
+    private static final byte FLAG_FADE = getFadeFlag();
+
+    private static byte getFadeFlag() {
+        try {
+            // New Hytale version: DebugFlags is a class and Fade is a static byte
+            return DebugFlags.class.getField("Fade").getByte(null);
+        } catch (Throwable t1) {
+            try {
+                // Old Hytale version: DebugFlags is an enum and has getValue()
+                Object enumValue = DebugFlags.class.getField("Fade").get(null);
+                int value = (int) enumValue.getClass().getMethod("getValue").invoke(enumValue);
+                return (byte) (1 << value);
+            } catch (Throwable t2) {
+                return (byte) 2; // Default to 2 (1 << 1) if both fail
+            }
+        }
+    }
 
     private final Vector3f pointColor;
     private final Vector3f lineColor;
