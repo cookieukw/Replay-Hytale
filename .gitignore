@@ -44,3 +44,4 @@ build/
 .kotlin
 devserver
 /.idea/
+bin
