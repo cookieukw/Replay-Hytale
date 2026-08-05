@@ -12,5 +12,6 @@ public class ReplayStageState {
     public boolean sentTranslations;
 
     public boolean restoredViewRadius;
+    public boolean processedConfigPhase;
 
 }

@@ -63,6 +63,9 @@ public class CommandsStack {
         return !redoCommands.isEmpty();
     }
 
-    public void clear() {}
+    public void clear() {
+        commands.clear();
+        redoCommands.clear();
+    }
 
 }

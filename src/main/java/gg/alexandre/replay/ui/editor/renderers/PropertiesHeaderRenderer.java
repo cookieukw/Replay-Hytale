@@ -18,6 +18,7 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
 
     private int propertiesCount = -1;
     private UIState.Keyframe lastSelectedKeyframe = null;
+    private int lastDraggingTick = -1;
 
     public PropertiesHeaderRenderer(@Nonnull ReplayState state) {
         super(state);
@@ -27,11 +28,14 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
     public void render(@Nonnull UICommandBuilder uiCommandBuilder, @Nonnull UIEventHandler<EditorUI.Data> eventHandler,
                        @Nonnull ReplayState state, int width) {
         if (propertiesCount == state.timeline.getProperties().size() &&
-            lastSelectedKeyframe == state.ui.selectedKeyframe) {
+            lastSelectedKeyframe == state.ui.selectedKeyframe &&
+            lastDraggingTick == state.ui.draggingTick &&
+            !state.ui.dirtyTimeline) {
             return;
         }
         propertiesCount = state.timeline.getProperties().size();
         lastSelectedKeyframe = state.ui.selectedKeyframe;
+        lastDraggingTick = state.ui.draggingTick;
 
         StringBuilder headers = new StringBuilder();
 
@@ -116,8 +120,9 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
 
         for (BaseProperty<?> property : state.timeline.getProperties().values()) {
             String id = property.id();
-            boolean hasSelectedKeyframe = state.ui.selectedKeyframe != null &&
-                                          state.ui.selectedKeyframe.propertyId().equals(id);
+            boolean hasSelectedKeyframe = (state.ui.selectedKeyframe != null &&
+                                           state.ui.selectedKeyframe.propertyId().equals(id)) ||
+                                          property.getValues().containsKey(state.ui.draggingTick);
 
             headers.append(String.format("""
                     @Container {
@@ -163,15 +168,25 @@ public class PropertiesHeaderRenderer extends BaseRenderer<EditorUI.Data> {
         boolean hasSelectedKeyframe = state.ui.selectedKeyframe != null &&
                                       state.ui.selectedKeyframe.propertyId().equals(propertyId);
 
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
+        
+        int playhead = context.data.playhead;
+
         if (hasSelectedKeyframe) {
             state.commandsStack.execute(new RemoveKeyframeCommand(
                     state, propertyId, state.ui.selectedKeyframe.tick()
             ));
+        } else if (property.getValues().containsKey(playhead)) {
+            // Toggle behavior: if a keyframe already exists at the playhead, remove it
+            state.commandsStack.execute(new RemoveKeyframeCommand(
+                    state, propertyId, playhead
+            ));
         } else {
-            BaseProperty property = state.timeline.getProperties().get(propertyId);
-
             state.commandsStack.execute(new AddKeyframeCommand(
-                    state, propertyId, context.data.playhead, property.getDefaultValue(state)
+                    state, propertyId, playhead, property.getDefaultValue(state)
             ));
         }
 

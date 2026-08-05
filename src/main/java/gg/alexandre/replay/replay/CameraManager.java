@@ -29,7 +29,7 @@ public class CameraManager {
 
     private Rotation3f lastRotation = new Rotation3f();
 
-    private boolean cutScene = false;
+    private boolean cutScene;
     private boolean appliedFreeCameraMovementSettings;
     private long nextFreeCameraMovementSettingsNanos;
 

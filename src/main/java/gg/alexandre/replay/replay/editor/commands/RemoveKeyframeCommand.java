@@ -21,16 +21,26 @@ public class RemoveKeyframeCommand extends CommandBase {
 
     @Override
     public void execute() {
-        BaseProperty property = state.timeline.getProperties().get(propertyId);
+        BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+        if (property == null) {
+            return;
+        }
         value = property.getValues().remove(tick);
     }
 
     @Override
     public void undo() {
         if (value != null) {
-            BaseProperty property = state.timeline.getProperties().get(propertyId);
-            property.getValues().put(tick, value);
+            BaseProperty<?> property = state.timeline.getProperties().get(propertyId);
+            if (property != null) {
+                restoreKeyframeGeneric(property, tick, value);
+            }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void restoreKeyframeGeneric(BaseProperty<T> property, int tick, Object value) {
+        property.getValues().put(tick, (T) value);
     }
 
 }

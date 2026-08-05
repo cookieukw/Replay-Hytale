@@ -53,7 +53,8 @@ public class CutSceneUI extends BaseUI<CutSceneUI.Data> {
             if (name.endsWith(CutSceneRepository.CUTSCENE_EXTENSION)) {
                 name = name.substring(0, name.length() - CutSceneRepository.CUTSCENE_EXTENSION.length());
             }
-            uiCommandBuilder.set("#List[" + i + "].Text", name);
+            uiCommandBuilder.set("#List[" + i + "][0].Text", name);
+            uiCommandBuilder.set("#List[" + i + "][1].Visible", false);
         }
 
         if (cutScenes.isEmpty()) {
@@ -77,7 +78,7 @@ public class CutSceneUI extends BaseUI<CutSceneUI.Data> {
         for (int i = 0; i < cutScenes.size(); i++) {
             Path replay = cutScenes.get(i);
             eventHandler.handle(CustomUIEventBindingType.Activating,
-                    "#List[" + i + "]",
+                    "#List[" + i + "][0]",
                     context -> onCutScene(context, replay)
             );
         }

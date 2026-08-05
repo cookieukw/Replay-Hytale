@@ -82,8 +82,8 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
 
         recordings.put(playerRef, data);
 
-        String name = CameramanUtil.NAME_PREFIX + playerRef.getUsername();
-        UUID uuid = UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
+        String name = cameramanNameFor(playerRef);
+        UUID uuid = cameramanUuidFor(name);
         watcherToPlayer.put(uuid, playerRef);
 
         logger.atInfo().log("Started recording");
@@ -139,8 +139,8 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
         Store<EntityStore> store = ref.getStore();
         World world = store.getExternalData().getWorld();
 
-        String name = CameramanUtil.NAME_PREFIX + playerRef.getUsername();
-        UUID uuid = UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
+        String name = cameramanNameFor(playerRef);
+        UUID uuid = cameramanUuidFor(name);
 
         world.execute(() -> {
             if (data.watcher != null) {
@@ -166,14 +166,17 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
             return;
         }
 
+        // Always remove from watcherToPlayer, regardless of world.execute() success
+        if (data.watcher != null) {
+            watcherToPlayer.remove(data.watcher.getUuid());
+        }
+
         Ref<EntityStore> ref = playerRef.getReference();
         assert ref != null;
         Store<EntityStore> store = ref.getStore();
         World world = store.getExternalData().getWorld();
         world.execute(() -> {
             if (data.watcher != null) {
-                watcherToPlayer.remove(data.watcher.getUuid());
-
                 Ref<EntityStore> watcherRef = data.watcher.getReference();
                 if (watcherRef != null && watcherRef.isValid()) {
                     world.getEntityStore().getStore().removeEntity(watcherRef, RemoveReason.REMOVE);
@@ -229,7 +232,7 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
         }
     }
 
-    public void registerPacketsListener() {
+    private void registerPacketsListener() {
         PacketAdapters.registerOutbound((PacketWatcher) (handler, packet) -> {
             if (packet instanceof Ping || handler.getAuth() == null) {
                 return;
@@ -294,6 +297,16 @@ public class ReplayRecorder extends TickingSystem<EntityStore> {
     @Nullable
     public RecordingData getRecordingData(@Nonnull PlayerRef playerRef) {
         return recordings.get(playerRef);
+    }
+
+    @Nonnull
+    private static String cameramanNameFor(@Nonnull PlayerRef playerRef) {
+        return CameramanUtil.NAME_PREFIX + playerRef.getUsername();
+    }
+
+    @Nonnull
+    private static UUID cameramanUuidFor(@Nonnull String name) {
+        return UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
     }
 
 }

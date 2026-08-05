@@ -13,6 +13,7 @@ public class DisconnectEvent {
         PlayerRef player = event.getPlayerRef();
         ReplayPlugin.get().stopRecording(player);
         ReplayPlugin.get().stopReplaying(player);
+        ReplayPlugin.get().stopCutScene(player);
     }
 
     public static void onShutdown(@Nonnull ShutdownEvent event) {
