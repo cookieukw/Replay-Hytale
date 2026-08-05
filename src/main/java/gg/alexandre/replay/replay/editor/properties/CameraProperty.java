@@ -8,6 +8,7 @@ import gg.alexandre.replay.replay.state.ReplayState;
 import gg.alexandre.replay.replay.state.UIState;
 import gg.alexandre.replay.ui.event.UIEventContext;
 import gg.alexandre.replay.util.Position;
+import org.joml.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,9 +67,12 @@ public class CameraProperty extends BaseProperty<Position> {
             double p2Pitch = unwrapRelative(p2.pitch(), p1Pitch);
             double p3Pitch = unwrapRelative(p3.pitch(), p2Pitch);
 
-            double x = InterpolationUtil.catmullRom(p0.x(), p1.x(), p2.x(), p3.x(), ratio);
-            double y = InterpolationUtil.catmullRom(p0.y(), p1.y(), p2.y(), p3.y(), ratio);
-            double z = InterpolationUtil.catmullRom(p0.z(), p1.z(), p2.z(), p3.z(), ratio);
+            Vector3d v0 = new Vector3d(p0.x(), p0.y(), p0.z());
+            Vector3d v1 = new Vector3d(p1.x(), p1.y(), p1.z());
+            Vector3d v2 = new Vector3d(p2.x(), p2.y(), p2.z());
+            Vector3d v3 = new Vector3d(p3.x(), p3.y(), p3.z());
+
+            Vector3d pos = InterpolationUtil.catmullRomCentripetal(v0, v1, v2, v3, ratio);
 
             double yaw = InterpolationUtil.catmullRom(p0Yaw, p1Yaw, p2Yaw, p3Yaw, ratio);
             double pitch = InterpolationUtil.catmullRom(p0Pitch, p1Pitch, p2Pitch, p3Pitch, ratio);
@@ -76,7 +80,7 @@ public class CameraProperty extends BaseProperty<Position> {
             yaw = normalizeAngle(yaw);
             pitch = normalizeAngle(pitch);
 
-            return new Position(x, y, z, yaw, pitch);
+            return new Position(pos.x, pos.y, pos.z, yaw, pitch);
         }
     }
 
