@@ -35,7 +35,7 @@ public class CameraManager {
 
     public void moveCamera(@Nonnull ReplayState state, @Nonnull PlayerRef playerRef, boolean force) {
         boolean hadFov = hasFov;
-        hasFov = state.edit.fov != 1.0;
+        hasFov = Math.abs(state.edit.fov - 1.0) > 1.0e-6;
 
         boolean wasFollowingPath = followingPath;
         followingPath = (state.stage.isPlaying && !state.ui.controlGame) || force;
@@ -104,8 +104,8 @@ public class CameraManager {
 
                 settings.rotation = PositionUtil.toDirectionPacket(rotation);
                 settings.rotationType = RotationType.Custom;
-                settings.rotationLerpSpeed = 0.15f;
-                settings.positionLerpSpeed = 0.15f;
+                settings.rotationLerpSpeed = 1.0f;
+                settings.positionLerpSpeed = 1.0f;
 
                 if (!cutScene) {
                     settings.sendMouseMotion = false;
