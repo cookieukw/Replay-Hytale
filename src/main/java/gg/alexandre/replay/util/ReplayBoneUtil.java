@@ -8,17 +8,17 @@ public class ReplayBoneUtil {
     private static final HytaleLogger logger = HytaleLogger.forEnclosingClass();
 
     /**
-     * Aplica uma rotação visual a um osso específico de uma entidade.
-     * Esta alteração é enviada apenas para o observer (jogador assistindo ao replay).
+     * Applies a visual rotation to a specific entity bone.
+     * This update is sent only to the observer (player watching the replay).
      */
     public static void applyBoneRotation(PlayerRef observer, long entityId, String boneName, Vector3f rotation) {
-        // TODO: Investigação da API do Hytale
-        // Descobrir o pacote correto (ex: UpdateEntityModelPacket) ou o Componente (ModelComponent/AnimationComponent)
-        // que permite sobrescrever a rotação de um osso para esta entidade no cliente.
+        // TODO: Hytale API Investigation
+        // Identify the proper packet (e.g. UpdateEntityModelPacket) or component (ModelComponent/AnimationComponent)
+        // that allows overriding bone rotation for this entity on the client.
         
-        logger.atInfo().log("Simulando rotação de osso -> Observer: %s | EntityID: %d | Osso: %s | Pitch: %.2f, Yaw: %.2f, Roll: %.2f",
+        logger.atInfo().log("Simulating bone rotation -> Observer: %s | EntityID: %d | Bone: %s | Pitch: %.2f, Yaw: %.2f, Roll: %.2f",
                 observer.getUuid(), entityId, boneName, rotation.x, rotation.y, rotation.z);
         
-        // Aqui construiremos a lógica final de rede para enviar ao packet handler do observer.
+        // Final networking logic will be built here to send to the observer packet handler.
     }
 }
