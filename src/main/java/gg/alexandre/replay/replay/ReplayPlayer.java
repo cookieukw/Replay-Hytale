@@ -454,7 +454,7 @@ public class ReplayPlayer extends BasePlayer {
         final World finalTargetWorld = targetWorld;
         Universe.get().getPlayerStorage().load(playerRef.getUuid())
                 .thenCompose(holder -> {
-                    CompletableFuture<Ref<EntityStore>> future = new CompletableFuture<>();
+                    CompletableFuture<PlayerRef> future = new CompletableFuture<>();
                     finalTargetWorld.execute(() -> {
                         Universe.get().resetPlayer(playerRef, holder, finalTargetWorld, null)
                                 .whenComplete((result, ex) -> {
