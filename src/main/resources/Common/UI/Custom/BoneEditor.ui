@@ -1,0 +1,85 @@
+$C = "Common.ui";
+
+Group {
+  LayoutMode: MiddleCenter;
+  
+  $C.@DecoratedContainer {
+    @CloseButton = true;
+    @Title = %replay.editBoneKeyframe;
+    @CancelText = %replay.cancel;
+    @SaveText = %replay.addKeyframe;
+
+    Anchor: (Width: 800);
+
+    #Title {
+      $C.@Title { @Text = @Title; }
+    }
+
+    #Content {
+      LayoutMode: Top;
+      Padding: (Full: 30);
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 10, Bottom: 10, Height: 30);
+
+        Label {
+          Text: "Entity ID: ";
+          FlexWeight: 1;
+        }
+
+        $C.@TextField #EntityIdInput {
+          FlexWeight: 2;
+        }
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 10, Bottom: 10, Height: 30);
+
+        Label {
+          Text: "Bone Name: ";
+          FlexWeight: 1;
+        }
+
+        $C.@TextField #BoneNameInput {
+          FlexWeight: 2;
+        }
+      }
+
+      Label { Text: "Pitch (X)"; Anchor: (Top: 10); }
+      $C.@SliderNumberField #PitchSlider {
+        @Anchor = (Top: 5, Bottom: 5);
+      }
+
+      Label { Text: "Yaw (Y)"; Anchor: (Top: 10); }
+      $C.@SliderNumberField #YawSlider {
+        @Anchor = (Top: 5, Bottom: 5);
+      }
+      
+      Label { Text: "Roll (Z)"; Anchor: (Top: 10); }
+      $C.@SliderNumberField #RollSlider {
+        @Anchor = (Top: 5, Bottom: 15);
+      }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Top: 30);
+
+        $C.@CancelTextButton #Cancel {
+          @Text = @CancelText;
+          FlexWeight: 1;
+        }
+
+        Group {
+          Anchor: (Width: 10);
+        }
+
+        $C.@TextButton #Save {
+          @Text = @SaveText;
+          FlexWeight: 1;
+        }
+      }
+    }
+  }
+}
