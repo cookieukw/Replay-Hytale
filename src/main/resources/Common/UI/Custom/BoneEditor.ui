@@ -21,45 +21,66 @@ Group {
 
       Group {
         LayoutMode: Left;
-        Anchor: (Top: 10, Bottom: 10, Height: 30);
+        Anchor: (Top: 10, Bottom: 10, Height: 36);
 
         Label {
           Text: "Entity ID: ";
           FlexWeight: 1;
+          Style: (FontSize: 16);
         }
 
-        $C.@TextField #EntityIdInput {
+        TextField #EntityIdInput {
+          Background: $C.@InputBoxBackground;
           FlexWeight: 2;
+          Padding: (Horizontal: 10);
         }
       }
 
       Group {
         LayoutMode: Left;
-        Anchor: (Top: 10, Bottom: 10, Height: 30);
+        Anchor: (Top: 10, Bottom: 10, Height: 36);
 
         Label {
           Text: "Bone Name: ";
           FlexWeight: 1;
+          Style: (FontSize: 16);
         }
 
-        $C.@TextField #BoneNameInput {
+        TextField #BoneNameInput {
+          Background: $C.@InputBoxBackground;
           FlexWeight: 2;
+          Padding: (Horizontal: 10);
         }
       }
 
-      Label { Text: "Pitch (X)"; Anchor: (Top: 10); }
-      $C.@SliderNumberField #PitchSlider {
-        @Anchor = (Top: 5, Bottom: 5);
+      Label { 
+        Text: "Pitch (X)"; 
+        Anchor: (Top: 10); 
+        Style: (FontSize: 16);
+      }
+      SliderNumberField #PitchSlider {
+        Anchor: (Top: 5, Bottom: 5, Height: 30);
+        SliderStyle: $C.@DefaultSliderStyle;
       }
 
-      Label { Text: "Yaw (Y)"; Anchor: (Top: 10); }
-      $C.@SliderNumberField #YawSlider {
-        @Anchor = (Top: 5, Bottom: 5);
+      Label { 
+        Text: "Yaw (Y)"; 
+        Anchor: (Top: 10); 
+        Style: (FontSize: 16);
+      }
+      SliderNumberField #YawSlider {
+        Anchor: (Top: 5, Bottom: 5, Height: 30);
+        SliderStyle: $C.@DefaultSliderStyle;
       }
       
-      Label { Text: "Roll (Z)"; Anchor: (Top: 10); }
-      $C.@SliderNumberField #RollSlider {
-        @Anchor = (Top: 5, Bottom: 15);
+      Label { 
+        Text: "Roll (Z)"; 
+        Anchor: (Top: 10); 
+        Style: (FontSize: 16);
+      }
+      SliderNumberField #RollSlider {
+        Anchor: (Top: 5, Bottom: 15, Height: 30);
+        SliderStyle: $C.@DefaultSliderStyle;
       }
 
       Group {
@@ -83,3 +104,4 @@ Group {
     }
   }
 }
+
