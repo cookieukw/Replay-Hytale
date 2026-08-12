@@ -49,6 +49,7 @@ import gg.alexandre.replay.protocol.ReplayPacket;
 import gg.alexandre.replay.protocol.ReplayProtocol;
 import gg.alexandre.replay.protocol.packets.EndSnapshotReplayPacket;
 import gg.alexandre.replay.protocol.packets.TickReplayPacket;
+import gg.alexandre.replay.replay.editor.properties.EntityBonePath;
 import gg.alexandre.replay.replay.editor.properties.base.BaseProperty;
 import gg.alexandre.replay.replay.state.ReplayState;
 import gg.alexandre.replay.util.CameramanUtil;
@@ -56,8 +57,10 @@ import gg.alexandre.replay.util.CameraPathDebugOverlay;
 import gg.alexandre.replay.util.FovPacketUtil;
 import gg.alexandre.replay.util.Position;
 import gg.alexandre.replay.util.PositionTracker;
+import gg.alexandre.replay.util.ReplayBoneUtil;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.io.FileReader;
@@ -71,9 +74,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class ReplayPlayer extends BasePlayer {
 
@@ -449,7 +454,7 @@ public class ReplayPlayer extends BasePlayer {
         final World finalTargetWorld = targetWorld;
         Universe.get().getPlayerStorage().load(playerRef.getUuid())
                 .thenCompose(holder -> {
-                    java.util.concurrent.CompletableFuture<Ref<EntityStore>> future = new java.util.concurrent.CompletableFuture<>();
+                    CompletableFuture<Ref<EntityStore>> future = new CompletableFuture<>();
                     finalTargetWorld.execute(() -> {
                         Universe.get().resetPlayer(playerRef, holder, finalTargetWorld, null)
                                 .whenComplete((result, ex) -> {
@@ -676,10 +681,10 @@ public class ReplayPlayer extends BasePlayer {
 
             if (state.timeline.getBonePaths() != null) {
                 long currentTimestamp = (long) state.targetTick;
-                for (java.util.List<gg.alexandre.replay.replay.editor.properties.EntityBonePath> paths : state.timeline.getBonePaths().values()) {
-                    for (gg.alexandre.replay.replay.editor.properties.EntityBonePath path : paths) {
-                        org.joml.Vector3f rot = path.getInterpolatedRotation(currentTimestamp);
-                        gg.alexandre.replay.util.ReplayBoneUtil.applyBoneRotation(playerRef, path.getEntityId(), path.getBoneName(), rot);
+                for (List<EntityBonePath> paths : state.timeline.getBonePaths().values()) {
+                    for (EntityBonePath path : paths) {
+                        Vector3f rot = path.getInterpolatedRotation(currentTimestamp);
+                        ReplayBoneUtil.applyBoneRotation(playerRef, path.getEntityId(), path.getBoneName(), rot);
                     }
                 }
             }
