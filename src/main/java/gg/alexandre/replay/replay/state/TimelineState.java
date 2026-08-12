@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.hypixel.hytale.server.core.util.io.FileUtil;
 import gg.alexandre.replay.ReplayPlugin;
+import gg.alexandre.replay.replay.editor.properties.EntityBonePath;
 import gg.alexandre.replay.replay.editor.properties.base.BaseProperty;
 
 import javax.annotation.Nonnull;
@@ -25,7 +26,7 @@ public class TimelineState {
     private final Map<String, BaseProperty<?>> properties = new HashMap<>();
 
     @SerializedName("bonePaths")
-    private final Map<Long, List<gg.alexandre.replay.replay.editor.properties.EntityBonePath>> bonePaths = new HashMap<>();
+    private final Map<Long, List<EntityBonePath>> bonePaths = new HashMap<>();
 
     private Instant lastSaved = Instant.now();
 
@@ -60,7 +61,7 @@ public class TimelineState {
     }
 
     @Nonnull
-    public Map<Long, List<gg.alexandre.replay.replay.editor.properties.EntityBonePath>> getBonePaths() {
+    public Map<Long, List<EntityBonePath>> getBonePaths() {
         return bonePaths;
     }
 }
