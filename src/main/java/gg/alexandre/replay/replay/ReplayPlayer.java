@@ -663,6 +663,16 @@ public class ReplayPlayer extends BasePlayer {
             for (BaseProperty<?> property : state.timeline.getProperties().values()) {
                 property.handle(state, state.targetTick);
             }
+
+            if (state.timeline.getBonePaths() != null) {
+                long currentTimestamp = (long) state.targetTick;
+                for (java.util.List<gg.alexandre.replay.replay.editor.properties.EntityBonePath> paths : state.timeline.getBonePaths().values()) {
+                    for (gg.alexandre.replay.replay.editor.properties.EntityBonePath path : paths) {
+                        org.joml.Vector3f rot = path.getInterpolatedRotation(currentTimestamp);
+                        gg.alexandre.replay.util.ReplayBoneUtil.applyBoneRotation(playerRef, path.getEntityId(), path.getBoneName(), rot);
+                    }
+                }
+            }
         } else {
             state.cameraManager.applyFreeCameraMovement(playerRef);
         }
