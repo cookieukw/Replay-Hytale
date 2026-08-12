@@ -23,6 +23,9 @@ public class TimelineState {
     @SerializedName("properties")
     private final Map<String, BaseProperty<?>> properties = new HashMap<>();
 
+    @SerializedName("bonePaths")
+    private final Map<Long, List<gg.alexandre.replay.replay.editor.properties.EntityBonePath>> bonePaths = new HashMap<>();
+
     private Instant lastSaved = Instant.now();
 
     public void save(@Nonnull UUID id, @Nonnull String name) {
@@ -53,5 +56,10 @@ public class TimelineState {
     @Nonnull
     public Instant getLastSaved() {
         return lastSaved;
+    }
+
+    @Nonnull
+    public Map<Long, List<gg.alexandre.replay.replay.editor.properties.EntityBonePath>> getBonePaths() {
+        return bonePaths;
     }
 }
