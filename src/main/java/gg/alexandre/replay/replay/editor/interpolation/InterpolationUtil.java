@@ -27,6 +27,11 @@ public class InterpolationUtil {
         double t2 = t1 + Math.pow(p1.distance(p2), alpha);
         double t3 = t2 + Math.pow(p2.distance(p3), alpha);
 
+        return catmullRomCentripetal(p0, p1, p2, p3, t0, t1, t2, t3, t);
+    }
+
+    public static Vector3d catmullRomCentripetal(Vector3d p0, Vector3d p1, Vector3d p2, Vector3d p3,
+                                                double t0, double t1, double t2, double t3, double t) {
         if (t1 == t2) return new Vector3d(p1);
 
         double t_ = t1 + t * (t2 - t1);
@@ -41,6 +46,22 @@ public class InterpolationUtil {
         return computeA(B1, B2, t1, t2, t_);
     }
 
+    public static double catmullRomCentripetal(double p0, double p1, double p2, double p3,
+                                               double t0, double t1, double t2, double t3, double t) {
+        if (t1 == t2) return p1;
+
+        double t_ = t1 + t * (t2 - t1);
+
+        double A1 = computeScalarA(p0, p1, t0, t1, t_);
+        double A2 = computeScalarA(p1, p2, t1, t2, t_);
+        double A3 = computeScalarA(p2, p3, t2, t3, t_);
+
+        double B1 = computeScalarA(A1, A2, t0, t2, t_);
+        double B2 = computeScalarA(A2, A3, t1, t3, t_);
+
+        return computeScalarA(B1, B2, t1, t2, t_);
+    }
+
     private static Vector3d computeA(Vector3d pA, Vector3d pB, double tA, double tB, double t_) {
         if (tA == tB) return new Vector3d(pA);
         double w0 = (tB - t_) / (tB - tA);
@@ -50,6 +71,13 @@ public class InterpolationUtil {
                 pA.y * w0 + pB.y * w1,
                 pA.z * w0 + pB.z * w1
         );
+    }
+
+    private static double computeScalarA(double pA, double pB, double tA, double tB, double t_) {
+        if (tA == tB) return pA;
+        double w0 = (tB - t_) / (tB - tA);
+        double w1 = (t_ - tA) / (tB - tA);
+        return pA * w0 + pB * w1;
     }
 
 }
