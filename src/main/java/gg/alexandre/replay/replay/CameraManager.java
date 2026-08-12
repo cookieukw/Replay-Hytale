@@ -134,9 +134,16 @@ public class CameraManager {
             return;
         }
 
-        settings.canFly = true;
-        settings.horizontalFlySpeed = Math.max(settings.horizontalFlySpeed, 10.32F);
-        settings.verticalFlySpeed = Math.max(settings.verticalFlySpeed, 10.32F);
+        try {
+            settings.canFly = true;
+        } catch (Throwable ignored) {
+            // MovementSettings.canFly may vary between server bytecode builds
+        }
+        try {
+            settings.horizontalFlySpeed = Math.max(settings.horizontalFlySpeed, 10.32F);
+            settings.verticalFlySpeed = Math.max(settings.verticalFlySpeed, 10.32F);
+        } catch (Throwable ignored) {
+        }
 
         handler.writeNoCache(new UpdateMovementSettings(settings));
         appliedFreeCameraMovementSettings = true;
@@ -155,8 +162,13 @@ public class CameraManager {
 
     private MovementSettings getCurrentMovementSettings(@Nonnull PlayerRef playerRef) {
         Ref<EntityStore> ref = playerRef.getReference();
-        assert ref != null;
+        if (ref == null) {
+            return null;
+        }
         Store<EntityStore> store = ref.getStore();
+        if (store == null) {
+            return null;
+        }
 
         MovementManager movementManager = store.getComponent(ref, MovementManager.getComponentType());
         if (movementManager == null) {
