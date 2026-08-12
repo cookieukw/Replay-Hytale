@@ -72,10 +72,16 @@ public class CameraProperty extends BaseProperty<Position> {
             Vector3d v2 = new Vector3d(p2.x(), p2.y(), p2.z());
             Vector3d v3 = new Vector3d(p3.x(), p3.y(), p3.z());
 
-            Vector3d pos = InterpolationUtil.catmullRomCentripetal(v0, v1, v2, v3, ratio);
+            double alpha = 0.5; // Centripetal parameter
+            double t0 = 0.0;
+            double t1 = t0 + Math.pow(v0.distance(v1), alpha);
+            double t2 = t1 + Math.pow(v1.distance(v2), alpha);
+            double t3 = t2 + Math.pow(v2.distance(v3), alpha);
 
-            double yaw = InterpolationUtil.catmullRom(p0Yaw, p1Yaw, p2Yaw, p3Yaw, ratio);
-            double pitch = InterpolationUtil.catmullRom(p0Pitch, p1Pitch, p2Pitch, p3Pitch, ratio);
+            Vector3d pos = InterpolationUtil.catmullRomCentripetal(v0, v1, v2, v3, t0, t1, t2, t3, ratio);
+
+            double yaw = InterpolationUtil.catmullRomCentripetal(p0Yaw, p1Yaw, p2Yaw, p3Yaw, t0, t1, t2, t3, ratio);
+            double pitch = InterpolationUtil.catmullRomCentripetal(p0Pitch, p1Pitch, p2Pitch, p3Pitch, t0, t1, t2, t3, ratio);
 
             yaw = normalizeAngle(yaw);
             pitch = normalizeAngle(pitch);
