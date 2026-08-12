@@ -13,6 +13,7 @@ if (localPropsFile.exists()) {
     localProps.load(FileInputStream(localPropsFile))
 }
 
+val hytaleModsDir = localProps.getProperty("hytale.mods.dir")
 val hytaleHome = localProps.getProperty("hytale.dir")
     ?: if (System.getProperty("os.name").lowercase().contains("win")) {
         "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
@@ -20,15 +21,17 @@ val hytaleHome = localProps.getProperty("hytale.dir")
         "${System.getProperty("user.home")}/.var/app/com.hypixel.HytaleLauncher/data/Hytale"
     }
 
+val targetModsDir = hytaleModsDir ?: "$hytaleHome/UserData/Mods"
+
 tasks.register<Copy>("deploy") {
     dependsOn("jar")
     from(tasks.jar.get().archiveFile)
-    into("$hytaleHome/UserData/Mods")
+    into(targetModsDir)
 
     doFirst {
-        if (!file(hytaleHome).exists()) {
-            println("WARNING: Hytale folder not found at: $hytaleHome")
-            println("Configure 'hytale.dir=/correct/path' in your local.properties")
+        if (!file(targetModsDir).exists()) {
+            println("WARNING: Target mods folder not found at: $targetModsDir")
+            println("Configure 'hytale.mods.dir=/correct/path' in your local.properties")
         }
     }
 }
