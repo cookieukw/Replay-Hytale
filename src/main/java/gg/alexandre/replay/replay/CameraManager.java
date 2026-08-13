@@ -166,11 +166,17 @@ public class CameraManager {
             return null;
         }
         Store<EntityStore> store = ref.getStore();
-        if (store == null) {
+        if (store == null || !store.isInThread()) {
             return null;
         }
 
-        MovementManager movementManager = store.getComponent(ref, MovementManager.getComponentType());
+        MovementManager movementManager;
+        try {
+            movementManager = store.getComponent(ref, MovementManager.getComponentType());
+        } catch (IllegalStateException e) {
+            return null;
+        }
+
         if (movementManager == null) {
             return null;
         }
