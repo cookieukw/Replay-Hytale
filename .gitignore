@@ -46,3 +46,11 @@ devserver
 /.idea/
 bin
 logs
+.cache
+universe
+telemetry
+.gitignore
+permissions.json
+mods/Hytale_HytaleGenerator/biome_editor.json
+bans.json
+whitelist.json
