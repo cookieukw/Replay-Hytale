@@ -468,7 +468,7 @@ public class ReplayPlayer extends BasePlayer {
                     if (toReplay && ref != null) {
                         var entityRef = ref.getReference();
                         if (entityRef != null) {
-                            CameramanUtil.makeGhost(entityRef.getStore(), entityRef);
+                            finalTargetWorld.execute(() -> CameramanUtil.makeGhost(entityRef.getStore(), entityRef));
                         }
                     }
                 })
